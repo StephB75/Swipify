@@ -47,7 +47,6 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
 
             case 'test':
                 console.log('test', request)
-                // console.log(current_scrape)
                 break;
         }
         
