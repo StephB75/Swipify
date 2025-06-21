@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
+import "./font.css"
 import { sampleData } from "./data/data.ts";
 
 type Product = {
@@ -23,12 +24,13 @@ const App: React.FC = () => {
 
   return (
     <div className="gallery-container">
+      <h1> liked gallery</h1>
       {products.map((item, index) => (
         <div className="gallery-item" key={index}>
           <img src={item.media} alt={item.name} className="gallery-image" />
           <p className="price">{item.price}</p>
           <a href={item.url} target="_blank" rel="noopener noreferrer">
-            View
+            link
           </a>
         </div>
       ))}
