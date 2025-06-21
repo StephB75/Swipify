@@ -17,6 +17,37 @@ window.addEventListener("load", async () => {
               sendMessage('refresh')
             }, 20000)
             break;
+          case 'test':
+            console.log('Swipify')
+            fetch('http://localhost:8080/scrape/parsepage', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+                body: JSON.stringify({ 
+                  html: document.documentElement.outerHTML,
+                // html: `
+                //   <div class="product-card">
+                //   <img src="https://example.com/images/mouse.jpg" alt="Wireless Mouse" />
+                //   <div class="product-info">
+                //     <span class="product-name">Wireless Mouse</span>
+                //     <span class="product-price">$19.99</span>
+                //   </div>
+                //   </div>
+                // `
+                })
+              })
+                .then(response => response.json())
+                .then(data => {
+                console.log('Swipify - /scrape/parsepage response:', data);
+              })
+              .catch(error => {
+                console.error('Swipify - Error posting to /scrape/parsepage:', error);
+              });
+            break
+          default:
+            console.log('Swipify - received message:', request);
+            break;
         }
       }
     );

@@ -48,6 +48,11 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
             case 'test':
                 console.log('test', request)
                 break;
+                
+            default:
+                console.log('Swipify - received message:', request);
+                // await sendResponse(sender_id, request)
+                break;
         }
         
         // console.log(request)

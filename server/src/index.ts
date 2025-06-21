@@ -3,6 +3,7 @@ import express from "express"
 import cors from "cors"
 
 // get routes
+import { scrape } from "./routers/scrape-route";
 import { example } from "./routers/route-example";
 
 dotenv.config();
@@ -11,21 +12,13 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 
 const app = express();
 
-const allowedOrigins = ['http://localhost:3000', 'https://www.thenodes.ca'];
-app.use(express.json())
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  methods: 'GET,POST,PUT,DELETE',
-  allowedHeaders: 'Content-Type,Authorization'
-}));
+app.use(express.json({ limit: "100mb" })); // increase payload size limit as needed
+app.use(cors()); // allow all origins
+
+
 
 // use routes
+app.use("/scrape", scrape);
 app.use("/example", example);
 
 app.get("/", (req, res) => {

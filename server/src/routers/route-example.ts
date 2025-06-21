@@ -19,13 +19,5 @@ router.post('/example', async (req, res) => {
     }
 })
 
-router.get('/test', async (req, res) => {
-    try {
-        res.status(200).json({status: 'cool test'})
-    } catch (e:any) {
-        console.warn("Error", e)
-        res.status(500).json({error: e.message || "server error"})
-    }
-})
 
 export const example = router

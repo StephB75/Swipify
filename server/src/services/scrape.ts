@@ -1,0 +1,332 @@
+// HTML preprocessing to reduce size
+const preprocessHTML = (html: string): string => {
+    return html
+        // Remove comments
+        .replace(/<!--[\s\S]*?-->/g, '')
+        // Remove script tags and content
+        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+        // Remove style tags and content
+        .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
+        // Remove unnecessary whitespace but preserve structure
+        .replace(/\s+/g, ' ')
+        // Remove empty lines
+        .replace(/\n\s*\n/g, '\n')
+        .trim();
+};
+
+// Smart HTML chunking that tries to preserve product boundaries
+const chunkHTML = (html: string, maxChunkSize: number = 15000): string[] => {
+    const preprocessed = preprocessHTML(html);
+    
+    // If it's small enough, return as single chunk
+    if (preprocessed.length <= maxChunkSize) {
+        return [preprocessed];
+    }
+    
+    const chunks: string[] = [];
+    
+    // Common product container patterns
+    const productPatterns = [
+        // Look for divs/articles with product-related classes
+        /(<(?:div|article|section|li)[^>]*(?:class|id)="[^"]*(?:product|item|card|listing)[^"]*"[^>]*>[\s\S]*?<\/(?:div|article|section|li)>)/gi,
+        // Look for repeated structures (fallback)
+        /(<(?:div|article|section)[^>]*>[\s\S]*?<\/(?:div|article|section)>)/gi
+    ];
+    
+    let bestSplit: string[] = [];
+    
+    // Try each pattern to find the best split
+    for (const pattern of productPatterns) {
+        const matches = preprocessed.match(pattern);
+        if (matches && matches.length > 1) {
+            bestSplit = matches;
+            break;
+        }
+    }
+    
+    // If no patterns found, split by common HTML tags
+    if (bestSplit.length === 0) {
+        bestSplit = preprocessed.split(/(?=<(?:div|article|section|ul|ol))/);
+    }
+    
+    let currentChunk = '';
+    
+    for (const section of bestSplit) {
+        const potentialChunk = currentChunk + section;
+        
+        if (potentialChunk.length > maxChunkSize) {
+            // Save current chunk if it has content
+            if (currentChunk.trim()) {
+                chunks.push(currentChunk.trim());
+            }
+            
+            // If single section is too large, force split it
+            if (section.length > maxChunkSize) {
+                const forceSplit = section.match(/.{1,15000}/g) || [section];
+                chunks.push(...forceSplit);
+                currentChunk = '';
+            } else {
+                currentChunk = section;
+            }
+        } else {
+            currentChunk = potentialChunk;
+        }
+    }
+    
+    // Don't forget the last chunk
+    if (currentChunk.trim()) {
+        chunks.push(currentChunk.trim());
+    }
+    
+    return chunks.filter(chunk => chunk.length > 100); // Filter out tiny chunks
+};
+
+// Send individual chunk to OpenAI with detailed error handling
+const processChunk = async (chunk: string, chunkIndex: number): Promise<any[]> => {
+    try {
+        // Validate inputs first
+        if (!process.env.OPENAI_API_KEY) {
+            throw new Error("OPENAI_API_KEY environment variable is not set");
+        }
+
+        if (!chunk || chunk.trim().length === 0) {
+            console.warn(`Chunk ${chunkIndex + 1} is empty, skipping`);
+            return [];
+        }
+
+        const requestBody = {
+            model: "gpt-4o", // Updated to current model
+            messages: [
+                {
+                    role: "system",
+                    content: "You are a product extraction assistant. Extract product listings from HTML content. For each product, return an object with: name (string), price (string with currency), media (string URL for image/video), url (string URL that links to the product page). Return ONLY a valid JSON array, even if empty: []"
+                },
+                {
+                    role: "user",
+                    content: `Extract products from this HTML. Look for:
+- Product names (in headings, titles, or product name elements)
+- Prices (with currency symbols like $, €, £)
+- Media URLs (img src attributes for product images)
+- Product URLs (href attributes in links that go to individual product pages)
+
+Common patterns:
+- Product links: <a href="/product/123">, <a href="https://site.com/item/abc">
+- Images: <img src="product-image.jpg" alt="Product Name">
+- Prices: $19.99, €25.00, £15.50
+
+HTML content:
+${chunk.substring(0, 12000)}`
+                }
+            ],
+            max_tokens: 4000,
+            temperature: 0.1
+        };
+
+        // Log request details for debugging
+        console.log(`Chunk ${chunkIndex + 1} - Content length: ${chunk.length}`);
+        console.log(`Request body size: ${JSON.stringify(requestBody).length} characters`);
+
+        const response = await fetch("https://api.openai.com/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
+            },
+            body: JSON.stringify(requestBody)
+        });
+
+        // Detailed error logging
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`Chunk ${chunkIndex + 1} API Error:`);
+            console.error(`Status: ${response.status} ${response.statusText}`);
+            console.error(`Response: ${errorText}`);
+            
+            // Try to parse error details
+            try {
+                const errorData = JSON.parse(errorText);
+                console.error(`Error details:`, errorData);
+            } catch (e) {
+                console.error(`Raw error response: ${errorText}`);
+            }
+            
+            return [];
+        }
+
+        const data = await response.json();
+        
+        if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+            console.error(`Chunk ${chunkIndex + 1}: Unexpected API response structure`, data);
+            return [];
+        }
+
+        const content = data.choices[0].message.content;
+
+        try {
+            // Extract the first JSON array from the response, ignoring any extra text
+            const match = content.match(/\[\s*{[\s\S]*?}\s*\]/);
+            const jsonString = match ? match[0] : content;
+            const products = JSON.parse(jsonString);
+            return Array.isArray(products) ? products : [];
+        } catch (parseError) {
+            console.warn(`Chunk ${chunkIndex + 1}: Failed to parse JSON response:`);
+            console.warn(`Content: ${content}`);
+            return [];
+        }
+        
+    } catch (error) {
+        console.error(`Error processing chunk ${chunkIndex + 1}:`, error);
+        return [];
+    }
+};
+
+// Parallel processing with timeout and progressive results
+const parse_products = async (
+    html: string, 
+    maxWaitTime: number = 120000, // 2 minutes default timeout
+    maxConcurrency: number = 3,   // Max parallel requests
+    onProgress?: (products: any[], completedChunks: number, totalChunks: number) => void
+) => {
+    try {
+        console.log(`Original HTML size: ${html.length} characters`);
+        
+        // Create chunks
+        const chunks = chunkHTML(html);
+        console.log(`Split into ${chunks.length} chunks`);
+        
+        // Log chunk sizes for debugging
+        chunks.forEach((chunk, i) => {
+            console.log(`Chunk ${i + 1}: ${chunk.length} characters`);
+        });
+        
+        const allProducts: any[] = [];
+        const completedChunks = new Set<number>();
+        const failedChunks = new Set<number>();
+        let processedCount = 0;
+        
+        // Create timeout promise
+        const timeoutPromise = new Promise<never>((_, reject) => {
+            setTimeout(() => {
+                reject(new Error(`Processing timed out after ${maxWaitTime}ms`));
+            }, maxWaitTime);
+        });
+        
+        // Process chunks with concurrency control
+        const processChunksWithConcurrency = async (): Promise<any[]> => {
+            const semaphore = new Array(maxConcurrency).fill(null);
+            let chunkIndex = 0;
+            
+            const processNextChunk = async (): Promise<void> => {
+                while (chunkIndex < chunks.length) {
+                    const currentIndex = chunkIndex++;
+                    
+                    try {
+                        console.log(`Starting chunk ${currentIndex + 1}/${chunks.length}...`);
+                        
+                        const chunkProducts = await processChunk(chunks[currentIndex]!, currentIndex);
+                        
+                        // Safely add products to shared array
+                        allProducts.push(...chunkProducts);
+                        completedChunks.add(currentIndex);
+                        processedCount++;
+                        
+                        console.log(`✅ Chunk ${currentIndex + 1} completed: ${chunkProducts.length} products`);
+                        console.log(`Progress: ${processedCount}/${chunks.length} chunks completed`);
+                        
+                        // Call progress callback if provided
+                        if (onProgress) {
+                            const currentProducts = [...allProducts]; // Create copy for callback
+                            onProgress(currentProducts, processedCount, chunks.length);
+                        }
+                        
+                    } catch (error) {
+                        failedChunks.add(currentIndex);
+                        console.error(`❌ Chunk ${currentIndex + 1} failed:`, error);
+                    }
+                }
+            };
+            
+            // Start concurrent processing
+            const workers = semaphore.map(() => processNextChunk());
+            await Promise.all(workers);
+            
+            return allProducts;
+        };
+        
+        // Race between processing and timeout
+        try {
+            console.log(`Starting parallel processing with max ${maxConcurrency} concurrent requests...`);
+            const startTime = Date.now();
+            
+            await Promise.race([
+                processChunksWithConcurrency(),
+                timeoutPromise
+            ]);
+            
+            const endTime = Date.now();
+            const duration = (endTime - startTime) / 1000;
+            
+            console.log(`\n=== Processing Complete ===`);
+            console.log(`Duration: ${duration.toFixed(2)} seconds`);
+            console.log(`Completed chunks: ${completedChunks.size}/${chunks.length}`);
+            console.log(`Failed chunks: ${failedChunks.size}/${chunks.length}`);
+            console.log(`Total products extracted: ${allProducts.length}`);
+            
+            if (failedChunks.size > 0) {
+                console.warn(`⚠️  Warning: ${failedChunks.size} chunks failed to process`);
+                console.warn(`Failed chunk indices: ${Array.from(failedChunks).map(i => i + 1).join(', ')}`);
+            }
+            
+        } catch (error) {
+            if (typeof error === "object" && error !== null && "message" in error && typeof (error as any).message === "string" && (error as any).message.includes('timed out')) {
+                console.warn(`⏰ Processing timed out after ${maxWaitTime}ms`);
+                console.log(`Partial results: ${allProducts.length} products from ${completedChunks.size}/${chunks.length} chunks`);
+            } else {
+                throw error;
+            }
+        }
+        
+        // Remove duplicates based on name, price, and url
+        const uniqueProducts = allProducts.filter((product, index, self) => 
+            index === self.findIndex(p => 
+                p.name === product.name && 
+                p.price === product.price && 
+                p.url === product.url
+            )
+        );
+        
+        console.log(`Unique products after deduplication: ${uniqueProducts.length}`);
+        
+        // Return results even if some chunks failed or timed out
+        return {
+            products: uniqueProducts,
+            metadata: {
+                totalChunks: chunks.length,
+                completedChunks: completedChunks.size,
+                failedChunks: failedChunks.size,
+                processingTimeMs: Date.now() - Date.now(), // Will be calculated properly
+                timedOut: failedChunks.size > 0 || completedChunks.size < chunks.length
+            }
+        };
+        
+    } catch (error) {
+        console.error("Error in chunked parsing:", error);
+        if (error instanceof Error) {
+            throw new Error(`Failed to parse HTML with chunking: ${error.message}`);
+        } else {
+            throw new Error(`Failed to parse HTML with chunking: ${String(error)}`);
+        }
+    }
+};
+
+// Helper function for easy JSON string return (backward compatibility)
+const parse_products_json = async (
+    html: string, 
+    maxWaitTime?: number, 
+    maxConcurrency?: number
+): Promise<string> => {
+    const result = await parse_products(html, maxWaitTime, maxConcurrency);
+    return JSON.stringify(result.products, null, 2);
+};
+
+export { parse_products, parse_products_json, chunkHTML, preprocessHTML };
