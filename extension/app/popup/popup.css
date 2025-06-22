@@ -2,14 +2,6 @@
     margin: 0;
     padding: 0;
     font-family: 'Aeonik', sans-serif;
-
-    --colour-primary: #000000;
-    --colour-secondary: #121212;
-    --colour-tertiary: #292929;
-
-    --colour-inverse-primary: #FFFFFF;
-
-    --colour-contrast-primary: #BB86FC;
 }
 
 body {

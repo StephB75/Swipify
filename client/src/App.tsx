@@ -24,7 +24,9 @@ function App() {
       setSession(session);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
     });
 
@@ -48,17 +50,28 @@ function App() {
   return (
     <div className="App">
       <div className="gallery-header1">
-          <img src={GALLERY_LOGO} alt="Swipify Gallery Logo" className="wholelogo" />
-          <h1>Welcome, Stephen!</h1>
+        <img
+          src={GALLERY_LOGO}
+          alt="Swipify Gallery Logo"
+          className="wholelogo"
+        />
+        <h1>Welcome, Stephen!</h1>
       </div>
-      
+
       <hr className="divider" />
 
       <div className="gallery-header2">
-          <h1>Products You Liked</h1>
-          <button onClick={() => supabase.auth.signOut()}>Sign Out</button>
+        <h1>Products You Liked</h1>
+        <button
+          onClick={async () => {
+            await supabase.auth.signOut();
+            setSession(null); // manually clear session right away
+          }}
+        >
+          Sign Out
+        </button>{" "}
       </div>
-      
+
       <div className="gallery-container">
         {products.map((item, index) => (
           <a
