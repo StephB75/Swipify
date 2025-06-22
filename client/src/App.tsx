@@ -3,7 +3,7 @@ import { supabase } from "./supabaseClient";
 import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import GALLERY_LOGO from "./assets/wholeLOGO.png";
-import { sampleData } from "./data/data"; // adjust if needed
+// import { sampleData } from "./data/data"; // adjust if needed
 import "./App.css";
 import "./pages/Gallery.css";
 import "./font.css";
@@ -81,7 +81,11 @@ function App() {
 
   return (
     <div className="App">
-      <div className="gallery-header1">
+      <div
+        className="gallery-header1"
+        style={{ cursor: "pointer" }}
+        onClick={() => window.location.pathname = "/"}
+      >
         <img
           src={GALLERY_LOGO}
           alt="Swipify Gallery Logo"

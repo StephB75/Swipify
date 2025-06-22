@@ -1,7 +1,7 @@
 console.log("Swipify: _____content.js_____ loaded");
 
-const api_url = 'http://localhost:8080'
-// const api_url = 'https://swipify-production.up.railway.app'
+// const api_url = 'http://localhost:8080'
+const api_url = 'https://swipify-production.up.railway.app'
 
 // ------------------------------------------ Event Listeners -------------------------------------------- //
 
@@ -316,7 +316,10 @@ const createCard = async (product_name, price, url, media_url) => {
     const exit_img = document.createElement('img')
     exit_img.src = await chrome.runtime.getURL('assets/images/x.png');
     exit.appendChild(exit_img)
-    exit.addEventListener('click', () => {closeOverlay()});
+    exit.addEventListener('click', () => {
+      closeOverlay()
+      if (currentCardIndex > 0) saveProducts()
+    });
 
     const swipe_left = document.createElement('swipify-swipe-left');
     swipe_left.classList.add('swipe-button');
