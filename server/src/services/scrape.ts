@@ -69,7 +69,7 @@ const resolveImageUrl = (imageUrl: string, baseUrl: string): string => {
         return imageUrl;
     }
 };
-
+const MAX_CHUNKS = 20;
 // Smart HTML chunking that tries to preserve product boundaries
 const chunkHTML = (html: string, maxChunkSize: number = 20): string[] => {
 // const chunkHTML = (html: string, maxChunkSize: number = 15000): string[] => {
@@ -134,7 +134,18 @@ const chunkHTML = (html: string, maxChunkSize: number = 20): string[] => {
     if (currentChunk.trim()) {
         chunks.push(currentChunk.trim());
     }
-    
+
+    let filteredChunks = chunks.filter(chunk => chunk.length > 100);
+
+    // Limit the number of chunks to MAX_CHUNKS
+    if (filteredChunks.length > MAX_CHUNKS) {
+        // Merge extra chunks into the last chunk
+        const limitedChunks = filteredChunks.slice(0, MAX_CHUNKS - 1);
+        const mergedChunk = filteredChunks.slice(MAX_CHUNKS - 1).join(' ');
+        limitedChunks.push(mergedChunk);
+        filteredChunks = limitedChunks;
+    }
+
     return chunks.filter(chunk => chunk.length > 100); // Filter out tiny chunks
 };
 
