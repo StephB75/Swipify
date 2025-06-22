@@ -493,7 +493,6 @@ const createCard = async (product_name, price, url, media_url) => {
   setTimeout(() => {
     loadProducts()
   }, 1000)
-
   // loadCards(test)
 });
 

@@ -8,6 +8,8 @@
     "eslint": "^9.20.1",
     "eslint-plugin-react": "^7.37.4",
     "globals": "^15.15.0",
+    "nodemon": "^3.1.10",
+    "ts-node": "^10.9.2",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.24.0"
   },
@@ -15,9 +17,9 @@
   "version": "1.0.0",
   "main": "src/index.js",
   "scripts": {
-    "start": "tsx watch src/index.ts",
     "dev": "tsx watch src/index.ts",
-    "typecheck": "tsc --noEmit && echo 'Type check passed!'"
+    "typecheck": "tsc --noEmit && echo 'Type check passed!'",
+    "start": "nodemon"
   },
   "keywords": [],
   "author": "James Yang",
@@ -36,7 +38,6 @@
     "firebase-admin": "^13.2.0",
     "jsdom": "^26.1.0",
     "mailchecker": "^6.0.17",
-    "nodemailer": "^6.10.0",
-    "nodemon": "^3.1.9"
+    "nodemailer": "^6.10.0"
   }
 }
