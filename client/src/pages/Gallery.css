@@ -1,9 +1,4 @@
 
-.gallery-header {
-  display: flex;
-  flex-direction: column;
-  gap: 40px;
-}
 
 .wholelogo {
   width: 200px;
@@ -57,11 +52,9 @@
 
 
 .gallery-container {
-  column-count: 3; /* number of columns */
-  column-gap: 40px;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 10px;
+  column-count: 4; /* number of columns */
+  width: 1200px;
+  column-gap: 30px;
 }
 
 .gallery-item {

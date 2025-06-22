@@ -6,7 +6,7 @@
 
 body {
   background-color: #ffffff;
-  margin: 5%;
+  margin: 2%;
   align-items: center;
 }
 
@@ -16,6 +16,49 @@ body {
   flex-direction: column;
   align-items: center;
 }
+
+/* swipify + welcome, stephen */
+.gallery-header1 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 40px;
+  width: 90%; /* ensures full container width */
+}
+
+
+/* products you liked + sign out */
+.gallery-header2 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 40px;
+  width: 1200px;
+}
+
+.divider {
+  border: none;        /* remove default border */
+  height: 2px;         /* thickness of line */
+  background-color: #eae6e0; /* line color */
+  margin: 20px 0;      /* vertical spacing */
+  width: 90%;         /* full width */
+}
+
+/* sign out button */
+.gallery-header2 button {
+  background-color: #535366;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 20px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+.gallery-header2 button:hover {
+  background-color: #1c1c1c;
+}
+
 
 
 .gallery-button {
@@ -44,4 +87,5 @@ body {
   outline: 3px solid #c7d2fe; /* Indigo-100 */
   outline-offset: 2px;
 }
+
 

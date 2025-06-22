@@ -1,70 +1,82 @@
 import { useState, useEffect } from "react";
-import { supabase } from "./supabaseClient"; // import your Supabase client
-import { Auth } from "@supabase/auth-ui-react"; // import Supabase Auth UI component
-import { ThemeSupa } from "@supabase/auth-ui-shared"; // import Supabase UI theme
-import { Link } from "react-router-dom"; // import router link to navigate between pages
-import LOGO from "./assets/SWIPIFYLOGO.png" 
+import { supabase } from "./supabaseClient";
+import { Auth } from "@supabase/auth-ui-react";
+import { ThemeSupa } from "@supabase/auth-ui-shared";
+import GALLERY_LOGO from "./assets/wholeLOGO.png";
+import { sampleData } from "./data/data"; // adjust if needed
+import "./App.css";
+import "./pages/Gallery.css";
+import "./font.css";
 
-
+type Product = {
+  name: string;
+  price: string;
+  media: string;
+  url: string;
+};
 
 function App() {
-  // Store the current session (null by default before login)
   const [session, setSession] = useState<any>(null);
+  const [products, setProducts] = useState<Product[]>([]);
 
-  // This runs once when the component mounts
   useEffect(() => {
-    // Get the current session (in case user is already logged in)
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session); // update the state with the session info
-      if (session) {
-        console.log("User ID:", session.user.id); // log user ID if already logged in
-      }
+      setSession(session);
     });
 
-    // Listen for any changes to auth state (login, logout, refresh, etc.)
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session); // update session state whenever auth state changes
-      if (session) {
-        console.log("User ID:", session.user.id); // log user ID when auth state changes (ex: after login)
-      }
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
     });
 
-    // Cleanup function: unsubscribe when component unmounts
     return () => subscription.unsubscribe();
   }, []);
 
-  // If no session (user not logged in), show the login form
+  useEffect(() => {
+    if (session) {
+      setProducts(sampleData);
+    }
+  }, [session]);
+
   if (!session) {
     return (
       <div className="App">
-        {/* Render Supabase Auth UI */}
         <Auth supabaseClient={supabase} appearance={{ theme: ThemeSupa }} />
       </div>
     );
   }
-  // If session exists (user is logged in), show logged-in content
-  else {
-    return (
-      <div className="App">
-        <img src={LOGO} alt="Swipify Logo" className="logo" />
-        <h1>Welcome to Swipify, Stephen!</h1>
-        <p> You are logged in.</p>
 
-        {/* Display the user ID
-        <p>User ID: {session.user.id}</p> */}
-
-        {/* Link to navigate to Gallery page */}
-        <Link to="/gallery" className="gallery-button">Go to Gallery</Link>
-
-        <br />
-
-        {/* Sign out button */}
-        <button onClick={() => supabase.auth.signOut()}>Sign Out</button>
+  return (
+    <div className="App">
+      <div className="gallery-header1">
+          <img src={GALLERY_LOGO} alt="Swipify Gallery Logo" className="wholelogo" />
+          <h1>Welcome, Stephen!</h1>
       </div>
-    );
-  }
+      
+      <hr className="divider" />
+
+      <div className="gallery-header2">
+          <h1>Products You Liked</h1>
+          <button onClick={() => supabase.auth.signOut()}>Sign Out</button>
+      </div>
+      
+      <div className="gallery-container">
+        {products.map((item, index) => (
+          <a
+            key={index}
+            href={item.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="gallery-item-link"
+          >
+            <div className="gallery-item">
+              <img src={item.media} alt={item.name} className="gallery-image" />
+              <p className="price">{item.price}</p>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 export default App;
