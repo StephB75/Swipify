@@ -1,7 +1,7 @@
 console.log("Swipify: _____content.js_____ loaded");
 
-const api_url = 'http://localhost:8080'
-// const api_url = 'https://swipify-production.up.railway.app'
+// const api_url = 'http://localhost:8080'
+const api_url = 'https://swipify-production.up.railway.app'
 
 // ------------------------------------------ Event Listeners -------------------------------------------- //
 

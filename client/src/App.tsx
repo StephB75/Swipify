@@ -8,8 +8,8 @@ import "./App.css";
 import "./pages/Gallery.css";
 import "./font.css";
 
-const api_url = 'http://localhost:8080'
-// const api_url = 'https://swipify-production.up.railway.app'
+// const api_url = 'http://localhost:8080'
+const api_url = 'https://swipify-production.up.railway.app'
 type Product = {
   Name_Of_Product: string;
   Price: string;
