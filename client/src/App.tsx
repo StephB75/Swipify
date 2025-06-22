@@ -8,12 +8,28 @@ import "./App.css";
 import "./pages/Gallery.css";
 import "./font.css";
 
+const api_url = 'http://localhost:8080'
+// const api_url = 'https://swipify-production.up.railway.app'
 type Product = {
-  name: string;
-  price: string;
-  media: string;
-  url: string;
+  Name_Of_Product: string;
+  Price: string;
+  Media_URL: string;
+  Ecommerce_URL: string;
 };
+
+const getUserLikedProducts = async (uid: string) => {
+  const response = await fetch(`${api_url}/db/getliked`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ uid }),
+  });
+  if (!response.ok) {
+    throw new Error("Failed to fetch liked products");
+  }
+  return response.json();
+}
 
 function App() {
   const [session, setSession] = useState<any>(null);
@@ -35,14 +51,30 @@ function App() {
 
   useEffect(() => {
     if (session) {
-      setProducts(sampleData);
+      // setProducts(sampleData);
+      // console.log(session.user)
+      if (session.user) {
+        const id = session.user.id
+
+        getUserLikedProducts(id).then((data)=>{
+          if (data.products)
+            console.log(data.products)
+            setProducts(data.products)
+        })
+
+        localStorage.setItem('swipify-id', id)
+      } else {
+        localStorage.setItem('swipify-id', '')
+      }
     }
   }, [session]);
 
   if (!session) {
     return (
       <div className="App">
-        <Auth supabaseClient={supabase} appearance={{ theme: ThemeSupa }} />
+        <div className="auth-container">
+          <Auth supabaseClient={supabase} appearance={{ theme: ThemeSupa }} />
+        </div>
       </div>
     );
   }
@@ -55,7 +87,7 @@ function App() {
           alt="Swipify Gallery Logo"
           className="wholelogo"
         />
-        <h1>Welcome, Stephen!</h1>
+        <h1>Welcome!</h1>
       </div>
 
       <hr className="divider" />
@@ -74,16 +106,17 @@ function App() {
 
       <div className="gallery-container">
         {products.map((item, index) => (
-          <a
+            <a
             key={index}
-            href={item.url}
+            href={item.Ecommerce_URL.startsWith('http') ? item.Ecommerce_URL : `https://${item.Ecommerce_URL}`}
             target="_blank"
             rel="noopener noreferrer"
             className="gallery-item-link"
-          >
+            >
             <div className="gallery-item">
-              <img src={item.media} alt={item.name} className="gallery-image" />
-              <p className="price">{item.price}</p>
+              <img src={item.Media_URL} alt={item.Name_Of_Product} className="gallery-image" />
+              <div className="name">{item.Name_Of_Product}</div>
+              <p className="price">{item.Price}</p>
             </div>
           </a>
         ))}

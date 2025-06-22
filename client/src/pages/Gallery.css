@@ -52,31 +52,52 @@
 
 
 .gallery-container {
-  column-count: 4; /* number of columns */
+  column-count: 4;      /* Number of vertical columns */
+  column-gap: 40px;     /* Space between columns */
   width: 1200px;
-  column-gap: 30px;
+  margin: 0 auto;
+  /* Remove grid properties */
+  display: block;
+}
+
+.gallery-item-link {
+  display: block;
+  break-inside: avoid;  /* Prevent items from breaking between columns */
+  margin-bottom: 30px;  /* Space between items vertically */
 }
 
 .gallery-item {
   /* Make sure items behave properly inside columns */
   background-color: #ffffff;
-  display: inline-block; /* important */
   width: 100%;           /* take full column width */
   margin-bottom: 20px;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
   border-radius: 15px;
   padding: 10px;
-  text-align: center;
+  /* text-align: center; */
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px
 }
 
 
+.gallery-item img{
+  width: 100%;
+  border-radius: 15px;
+}
 
+.gallery-item .name {
+  color: #000000;
+  white-space: no-wrap;
+}
 
 .price {
     text-decoration: none;
-    color: #535366;
+    color: #000000;
     font-weight: bold;
-    margin-top: 8px;
+    font-size: 2rem;
+    /* margin-top: 8px; */
 }
 .gallery-item-link {
   text-decoration: none; /* Remove underline from entire link */
