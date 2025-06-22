@@ -1,3 +1,5 @@
+const MAX_CHUNKS = 50;
+
 // HTML preprocessing to reduce size
 const preprocessHTML = (html: string): string => {
     return html
@@ -69,7 +71,7 @@ const resolveImageUrl = (imageUrl: string, baseUrl: string): string => {
         return imageUrl;
     }
 };
-const MAX_CHUNKS = 20;
+
 // Smart HTML chunking that tries to preserve product boundaries
 const chunkHTML = (html: string, maxChunkSize: number = 20): string[] => {
 // const chunkHTML = (html: string, maxChunkSize: number = 15000): string[] => {

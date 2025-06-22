@@ -22,7 +22,10 @@ window.addEventListener("load", async () => {
             break;
           case 'test':
             console.log('Swipify')
-            loadProducts().then(()=>{
+            loadProducts().then((data)=>{
+              // let products = data.products
+              // if (products.length > 0) openOverLay()
+              // else closeWaitOverlay()
               openOverLay()
             })
             openWaitOverLay()
