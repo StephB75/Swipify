@@ -1,40 +1,97 @@
+
+.gallery-header {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.wholelogo {
+  width: 200px;
+  height: auto;
+}
+
+.back-button {
+  align-self: flex-start;  /* prevents the button from stretching */
+  display: inline-block;   /* make width fit content */
+  width: auto;
+  text-decoration: none;
+  width: auto;
+  padding: 5px 10px;
+  color: #535366;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.back-button {
+  text-decoration: none;
+  padding: 5px 10px;
+  color: #535366;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: transparent; /* if you want a transparent background */
+  border: none; /* no border */
+  display: inline-block;
+  user-select: none;
+}
+
+.back-button:hover {
+  background-color: #1C1C1C;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  color: white; /* better contrast on dark bg */
+}
+
+.back-button:active {
+  transform: translateY(0);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+}
+.back-button:focus {
+  outline: 3px solid #c7d2fe; /* Indigo-100 */
+  outline-offset: 2px;
+}
+
+
 .gallery-container {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr); /* 4 columns */
-  gap: 20px;
-  padding: 20px;
-  font-weight: bold;
+  column-count: 3; /* number of columns */
+  column-gap: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 10px;
 }
 
 .gallery-item {
-  border: 1px solid #282828;
-  border-width: 2px;
+  /* Make sure items behave properly inside columns */
+  background-color: #ffffff;
+  display: inline-block; /* important */
+  width: 100%;           /* take full column width */
+  margin-bottom: 20px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 15px;
   padding: 10px;
   text-align: center;
-  border-radius: 15px; /* makes the entire card rounded */
 }
 
-.gallery-item a {
-  display: inline-block;
-  margin-top: 10px;
-  padding: 8px 16px;
-  background-color: #535366; /* light blue */
-  color: white;
+
+
+
+.price {
+    text-decoration: none;
+    color: #535366;
+    font-weight: bold;
+    margin-top: 8px;
+}
+.gallery-item-link {
+  text-decoration: none; /* Remove underline from entire link */
+  display: block;
+}
+
+.gallery-item-link:hover {
   text-decoration: none;
-  border-radius: 8px;
-  font-weight: 600;
-  transition: background-color 0.3s ease;
-}
-.gallery-item a:hover {
-  background-color: #EAE6E0; /* darker blue on hover */
 }
 
 
-
-.placeholder-box {
-  width: 100%;
-  height: 200px;
-  background-color: #eee;
-  border: 1px dashed #aaa;
-  border-radius: 15px; /* <-- this makes the corners rounded */
-}

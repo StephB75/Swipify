@@ -3,6 +3,9 @@ import { supabase } from "./supabaseClient"; // import your Supabase client
 import { Auth } from "@supabase/auth-ui-react"; // import Supabase Auth UI component
 import { ThemeSupa } from "@supabase/auth-ui-shared"; // import Supabase UI theme
 import { Link } from "react-router-dom"; // import router link to navigate between pages
+import LOGO from "./assets/SWIPIFYLOGO.png" 
+
+
 
 function App() {
   // Store the current session (null by default before login)
@@ -45,13 +48,15 @@ function App() {
   else {
     return (
       <div className="App">
-        <h1>Welcome! You are logged in.</h1>
+        <img src={LOGO} alt="Swipify Logo" className="logo" />
+        <h1>Welcome to Swipify, Stephen!</h1>
+        <p> You are logged in.</p>
 
-        {/* Display the user ID */}
-        <p>User ID: {session.user.id}</p>
+        {/* Display the user ID
+        <p>User ID: {session.user.id}</p> */}
 
         {/* Link to navigate to Gallery page */}
-        <Link to="/gallery">Go to Gallery</Link>
+        <Link to="/gallery" className="gallery-button">Go to Gallery</Link>
 
         <br />
 

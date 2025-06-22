@@ -1,6 +1,47 @@
-body {
-  font-family: sans-serif;
-  background-color: #f9f9f9;
-  margin: 0;
-  padding: 0;
+.logo {
+  width: 100px;
+  height: auto;
+  display: block;
 }
+
+body {
+  background-color: #ffffff;
+  margin: 5%;
+  align-items: center;
+}
+
+.App {
+  color: #1C1C1C;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+
+.gallery-button {
+  text-decoration: none;
+  padding: 5px 10px;
+  background-color: #535366; /* Indigo-600 */
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* shadow outside the box */
+}
+.gallery-button:hover {
+  background-color: #1C1C1C;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+.gallery-button:active {
+  transform: translateY(0);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+}
+.gallery-button:focus {
+  outline: 3px solid #c7d2fe; /* Indigo-100 */
+  outline-offset: 2px;
+}
+
