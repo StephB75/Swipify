@@ -72,29 +72,23 @@ const resolveImageUrl = (imageUrl: string, baseUrl: string): string => {
     }
 };
 
-// Smart HTML chunking that tries to preserve product boundaries
-const chunkHTML = (html: string, maxChunkSize: number = 20): string[] => {
-// const chunkHTML = (html: string, maxChunkSize: number = 15000): string[] => {
+const chunkHTML = (html: string, maxChunkSize: number = 20000): string[] => {
     const preprocessed = preprocessHTML(html);
-    
-    // If it's small enough, return as single chunk
+
     if (preprocessed.length <= maxChunkSize) {
         return [preprocessed];
     }
-    
+
     const chunks: string[] = [];
-    
+
     // Common product container patterns
     const productPatterns = [
-        // Look for divs/articles with product-related classes
         /(<(?:div|article|section|li)[^>]*(?:class|id)="[^"]*(?:product|item|card|listing)[^"]*"[^>]*>[\s\S]*?<\/(?:div|article|section|li)>)/gi,
-        // Look for repeated structures (fallback)
         /(<(?:div|article|section)[^>]*>[\s\S]*?<\/(?:div|article|section)>)/gi
     ];
-    
+
     let bestSplit: string[] = [];
-    
-    // Try each pattern to find the best split
+
     for (const pattern of productPatterns) {
         const matches = preprocessed.match(pattern);
         if (matches && matches.length > 1) {
@@ -102,26 +96,23 @@ const chunkHTML = (html: string, maxChunkSize: number = 20): string[] => {
             break;
         }
     }
-    
-    // If no patterns found, split by common HTML tags
+
     if (bestSplit.length === 0) {
         bestSplit = preprocessed.split(/(?=<(?:div|article|section|ul|ol))/);
     }
-    
+
     let currentChunk = '';
-    
+
     for (const section of bestSplit) {
         const potentialChunk = currentChunk + section;
-        
+
         if (potentialChunk.length > maxChunkSize) {
-            // Save current chunk if it has content
             if (currentChunk.trim()) {
                 chunks.push(currentChunk.trim());
             }
-            
-            // If single section is too large, force split it
+
             if (section.length > maxChunkSize) {
-                const forceSplit = section.match(/.{1,15000}/g) || [section];
+                const forceSplit = section.match(/.{1,40000}/g) || [section];
                 chunks.push(...forceSplit);
                 currentChunk = '';
             } else {
@@ -131,24 +122,16 @@ const chunkHTML = (html: string, maxChunkSize: number = 20): string[] => {
             currentChunk = potentialChunk;
         }
     }
-    
-    // Don't forget the last chunk
+
     if (currentChunk.trim()) {
         chunks.push(currentChunk.trim());
     }
 
-    // let filteredChunks = chunks.filter(chunk => chunk.length > 100);
+    // Return only the first half of the chunks array
+    // const half = Math.ceil(chunks.length / 2);
+    // return chunks.slice(0, half).filter(chunk => chunk.length > 100);
+    return chunks.filter(chunk => chunk.length > 100);
 
-    // Limit the number of chunks to MAX_CHUNKS
-    // if (filteredChunks.length > MAX_CHUNKS) {
-    //     // Merge extra chunks into the last chunk
-    //     const limitedChunks = filteredChunks.slice(0, MAX_CHUNKS - 1);
-    //     const mergedChunk = filteredChunks.slice(MAX_CHUNKS - 1).join(' ');
-    //     limitedChunks.push(mergedChunk);
-    //     filteredChunks = limitedChunks;
-    // }
-    // return filteredChunks
-    return chunks.filter(chunk => chunk.length > 100); // Filter out tiny chunks
 };
 
 // Send individual chunk to OpenAI with detailed error handling
