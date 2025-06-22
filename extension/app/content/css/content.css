@@ -190,7 +190,7 @@ swipify-overlay swipify-card .info {
 }
 
 swipify-overlay swipify-card .title {
-    font-size: 1rem;
+    font-size: 2.5vh;
     font-weight: normal;
     color: #000000;
     /* vertical clipping for overflowed text */
