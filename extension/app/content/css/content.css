@@ -1,97 +1,218 @@
-@font-face {font-family: 'GTWalsheimPro-Regular';src: url('https://cdn.shopify.com/s/files/1/0588/4228/4186/files/GTWalsheimPro-Regular.woff?v=1669253354') format('woff');} 
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 
-.test_menu{
-    position: fixed;
-    top: 1rem;
-    left: 1rem;
-    z-index: 1000;
-    background-color: #fff;
-    padding: 1rem;
-    border: 1px solid #000;
-}
-
-.test_menu button{
-    margin: 0.5rem;
-    padding: 0.5rem;
-    border: 1px solid #000;
-}
-
-.nodes_menu{
-    border: 1px solid #d1d1d1;
-    aspect-ratio: 1/1;
-    width:100%;         
-
-    border-radius: 10px;
-    margin-bottom: 15px;
-
-    overflow: hidden;
-    background-color: #BB86FC;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-
-    position: relative;
-}
-
-.nodes_menu * {
-    margin: 0;
+swipify-overlay * {
+    font-family: 'Aeonik', sans-serif;
     padding: 0;
-    /* font-family: 'GTWalsheimPro-Regular', sans-serif !important; */
-    /* font-family: "Inter", sans-serif !important; */
+    margin: 0;
 }
 
-.nodes_menu .nodes_title{
-    position: absolute;
-    top: 20px;
-    left: 20px;
+swipify-overlay {
+    position: fixed;
+    overflow: hidden;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999;
+    /* background-color: rgba(0, 0, 0, 0.1); */
+    background-color: rgba(0, 0, 0, 0.05);
+    /* background-color: transparent; */
+    backdrop-filter: blur(5px);
     
-    font-weight: bolder;
-    font-size: 16px;
-    z-index: 10;
-}
-.nodes_menu .nodes_title:hover{
-    text-decoration: underline;
-    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-.nodes-iframe{
+swipify-overlay.hidden {
     display: none;
 }
 
-/* ___________________________ SCRAPE ERROR ___________________________ */
-
-.nodes_menu #nodes_error{
+swipify-overlay swipify-exit{
     position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 30px;
+    height: 30px;
+    /* background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 50%; */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+
+    opacity: 0.5;
+}
+
+swipify-overlay swipify-exit img{
     width: 100%;
     height: 100%;
+    object-fit: cover;
+}
+
+swipify-overlay .swipe-button{
+    height: 50px;
+    width: 50px;
+    background-color: rgba(255, 255, 255, 1);
+    border-radius: 50%;
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    top: 50%;
+    transform: translateY(-50%);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    user-select: none;
+    transition: 0.3s ease;
+
+    z-index: 10000;
+}
+
+
+swipify-overlay .swipe-button.excited{transform: scale(1.1) translateY(-50%);}
+swipify-overlay swipify-swipe-left.excited{background-color: #000000;}
+swipify-overlay swipify-swipe-right.excited{background-color: #ff4444;}
+swipify-overlay .swipe-button.excited img{filter: invert(1);}
+
+swipify-overlay .swipe-button img{
+    width: 24px;
+    height: 24px;
+}
+
+swipify-overlay swipify-swipe-left{left: calc( (50% - 80vh * 595 / (882 * 2) ) / 2 - 25px);}
+swipify-overlay swipify-swipe-right{right: calc( (50% - 80vh * 595 / (882 * 2) ) / 2 - 25px);}
+
+swipify-overlay .swipe-button:hover{transform: scale(1.1) translateY(-50%);}
+swipify-overlay .swipe-button:hover img{filter: invert(1);}
+swipify-overlay swipify-swipe-left:hover{background-color: #000000;}
+swipify-overlay swipify-swipe-right:hover{background-color: #ff4444;}
+
+swipify-overlay swipify-message{
+    position: absolute;
+    color: rgb(170, 170, 170);
+    font-size: 0.8rem;
+}
+
+swipify-overlay swipify-deck{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     
-    background-color: #FF4F4F;
-    z-index: 20;
-    opacity: 0;
-    pointer-events: none;
+    z-index: 1000;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+swipify-overlay swipify-card {
+    position: absolute;
+    overflow: hidden;
+
+    /* background: linear-gradient(to bottom, #525367 70%, #FFFFFF 100%); */
+    /* background: linear-gradient(to bottom, #FFFFFF 50%, #525367 100%); */
+    
+    /* height: 80%; */
+    height: 80vh;
+    aspect-ratio: 595 / 882;
+    
+    z-index: 9999;
+    
+    background-color: #fff;
+    
+    /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.01);
+    border-radius: 20px;
     
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-
-    gap: 10px;
 
     padding: 20px;
-    
-    transition: 0.5s ease;
-}
 
-.nodes_menu #nodes_error.active{
-    pointer-events: all;
-    opacity: 1;
+    transition: 0.3s ease;
     cursor: pointer;
 }
 
-.nodes_menu  #nodes_error img{
-    width: 35%;
+swipify-overlay swipify-card.left-tilt {transform: rotate(-10deg) translateX(-20px);}
+swipify-overlay swipify-card.right-tilt {transform: rotate(10deg) translateX(20px);}
+
+swipify-overlay swipify-card.left-swiped {
+    transform: translate(-50%, -50%) translateX(-120vw) rotate(-20deg);
+    transition: transform 0.5s cubic-bezier(0.4, 0.2, 0.2, 1);
+    pointer-events: none;
+}
+swipify-overlay swipify-card.right-swiped {
+    transform: translate(-50%, -50%) translateX(120vw) rotate(20deg);
+    transition: transform 0.5s cubic-bezier(0.4, 0.2, 0.2, 1);
+    pointer-events: none;
 }
 
-.nodes_menu  #nodes_error_message{
-    color: #FFF;
-    font-size: 16px;
+swipify-overlay swipify-card .image-container {
+    width: 100%;
+    aspect-ratio: 1/1;
+    height: auto;
+    /* Remove flex-grow/shrink so it doesn't stretch */
+    flex: 0 0 auto;
+    aspect-ratio: 1/1;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    border-radius: 20px;
+    background-color: #fff;
+    position: relative;
+    overflow: hidden;
+    display: block;
+}
+
+swipify-overlay swipify-card .image-container img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+
+    border: 15px;
+
+    user-drag: none;
+    user-select: none;
+    pointer-events: none;
+}
+
+swipify-overlay swipify-card .info {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding-top: 20px;
+    padding-bottom: 7vh;
+    
+    overflow: hidden;
+}
+
+swipify-overlay swipify-card .title {
+    font-size: 1rem;
+    font-weight: normal;
+    color: #000000;
+    /* vertical clipping for overflowed text */
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;      /* Show up to 2 lines, then clip */
+    -webkit-box-orient: vertical;
+    line-clamp: 4;              /* For future compatibility */
+}
+
+swipify-overlay swipify-card .price {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+
+    font-size: 7vh;
+    font-weight: normal;
+    margin: 0;
+    height: 7vh;
+    display: flex;
+    align-items: center;
+
+    /* color:#525367; */
+    color:#000000;
 }

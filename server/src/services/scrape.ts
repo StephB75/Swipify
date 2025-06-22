@@ -14,6 +14,62 @@ const preprocessHTML = (html: string): string => {
         .trim();
 };
 
+// Helper function to resolve relative URLs
+const resolveUrl = (url: string, baseUrl: string): string => {
+    if (!url || !baseUrl) return url;
+    
+    try {
+        
+        if (url.includes(baseUrl)) {
+          return url;
+        } else if (url.startsWith('/')) {
+          return `${baseUrl}${url}`;
+        } else {
+          return `${baseUrl}/${url}`;
+        }
+
+    } catch (error) {
+        console.warn(`Failed to resolve URL "${url}" with base "${baseUrl}":`, error);
+        return url;
+    }
+};
+
+// Helper function to resolve image URLs
+const resolveImageUrl = (imageUrl: string, baseUrl: string): string => {
+    if (!imageUrl || !baseUrl) return imageUrl;
+    
+    try {
+        // If it's already a complete URL, return as is
+        if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+            return imageUrl;
+        }
+        
+        // Handle data URLs
+        if (imageUrl.startsWith('data:')) {
+            return imageUrl;
+        }
+        
+        // Parse base URL to get domain info
+        const base = new URL(baseUrl);
+        const baseDomain = `${base.protocol}//${base.host}`;
+        
+        // Handle different relative URL patterns
+        if (imageUrl.startsWith('//')) {
+            // Protocol-relative URL
+            return `${base.protocol}${imageUrl}`;
+        } else if (imageUrl.startsWith('/')) {
+            // Root-relative URL
+            return `${baseDomain}${imageUrl}`;
+        } else {
+            // Relative path
+            return `${baseDomain}/${imageUrl}`;
+        }
+    } catch (error) {
+        console.warn(`Failed to resolve image URL "${imageUrl}" with base "${baseUrl}":`, error);
+        return imageUrl;
+    }
+};
+
 // Smart HTML chunking that tries to preserve product boundaries
 const chunkHTML = (html: string, maxChunkSize: number = 15000): string[] => {
     const preprocessed = preprocessHTML(html);
@@ -82,7 +138,7 @@ const chunkHTML = (html: string, maxChunkSize: number = 15000): string[] => {
 };
 
 // Send individual chunk to OpenAI with detailed error handling
-const processChunk = async (chunk: string, chunkIndex: number): Promise<any[]> => {
+const processChunk = async (chunk: string, chunkIndex: number, baseUrl?: string): Promise<any[]> => {
     try {
         // Validate inputs first
         if (!process.env.OPENAI_API_KEY) {
@@ -114,12 +170,14 @@ Common patterns:
 - Images: <img src="product-image.jpg" alt="Product Name">
 - Prices: $19.99, €25.00, £15.50
 
+IMPORTANT: Include ALL URLs as found in the HTML, even if they are relative paths like "/products/abc" or "product/abc"
+
 HTML content:
 ${chunk.substring(0, 12000)}`
                 }
             ],
-            max_tokens: 4000,
-            temperature: 0.1
+            // max_tokens: 4000,
+            // temperature: 0.1
         };
 
         // Log request details for debugging
@@ -167,7 +225,19 @@ ${chunk.substring(0, 12000)}`
             const match = content.match(/\[\s*{[\s\S]*?}\s*\]/);
             const jsonString = match ? match[0] : content;
             const products = JSON.parse(jsonString);
-            return Array.isArray(products) ? products : [];
+            
+            if (Array.isArray(products)) {
+                // Resolve relative URLs if baseUrl is provided
+                if (baseUrl) {
+                    return products.map(product => ({
+                        ...product,
+                        url: product.url ? resolveUrl(product.url, baseUrl) : product.url,
+                        media: product.media ? resolveImageUrl(product.media, baseUrl) : product.media
+                    }));
+                }
+                return products;
+            }
+            return [];
         } catch (parseError) {
             console.warn(`Chunk ${chunkIndex + 1}: Failed to parse JSON response:`);
             console.warn(`Content: ${content}`);
@@ -183,12 +253,16 @@ ${chunk.substring(0, 12000)}`
 // Parallel processing with timeout and progressive results
 const parse_products = async (
     html: string, 
+    baseUrl?: string,           // NEW: Base URL for resolving relative URLs
     maxWaitTime: number = 120000, // 2 minutes default timeout
     maxConcurrency: number = 3,   // Max parallel requests
     onProgress?: (products: any[], completedChunks: number, totalChunks: number) => void
 ) => {
     try {
         console.log(`Original HTML size: ${html.length} characters`);
+        if (baseUrl) {
+            console.log(`Base URL for resolving relative URLs: ${baseUrl}`);
+        }
         
         // Create chunks
         const chunks = chunkHTML(html);
@@ -223,7 +297,7 @@ const parse_products = async (
                     try {
                         console.log(`Starting chunk ${currentIndex + 1}/${chunks.length}...`);
                         
-                        const chunkProducts = await processChunk(chunks[currentIndex]!, currentIndex);
+                        const chunkProducts = await processChunk(chunks[currentIndex]!, currentIndex, baseUrl);
                         
                         // Safely add products to shared array
                         allProducts.push(...chunkProducts);
@@ -305,7 +379,8 @@ const parse_products = async (
                 completedChunks: completedChunks.size,
                 failedChunks: failedChunks.size,
                 processingTimeMs: Date.now() - Date.now(), // Will be calculated properly
-                timedOut: failedChunks.size > 0 || completedChunks.size < chunks.length
+                timedOut: failedChunks.size > 0 || completedChunks.size < chunks.length,
+                baseUrl: baseUrl || null
             }
         };
         
@@ -322,11 +397,12 @@ const parse_products = async (
 // Helper function for easy JSON string return (backward compatibility)
 const parse_products_json = async (
     html: string, 
+    baseUrl?: string,          
     maxWaitTime?: number, 
     maxConcurrency?: number
 ): Promise<string> => {
-    const result = await parse_products(html, maxWaitTime, maxConcurrency);
+    const result = await parse_products(html, baseUrl, maxWaitTime, maxConcurrency);
     return JSON.stringify(result.products, null, 2);
 };
 
-export { parse_products, parse_products_json, chunkHTML, preprocessHTML };
+export { parse_products, parse_products_json, chunkHTML, preprocessHTML, resolveUrl, resolveImageUrl };

@@ -1,6 +1,6 @@
 import express from 'express'
 
-import { parse_products } from '~/services/scrape'
+import { parse_products, parse_products_json } from '~/services/scrape'
 
 const router = express.Router()
 
@@ -11,14 +11,14 @@ router.post('/parsepage', async (req, res) => {
         const data = req.body
         // console.log(data)
 
-        if (!data || !data.html) {
+        if (!data || !data.html || !data.baseUrl) {
             return res.status(400).json({ error: "Missing HTML content in request body" });
         }
 
         console.log("Parsing HTML content...")
-        const response = await parse_products(data.html)
+        const response = await parse_products(data.html, data.baseUrl)
 
-        res.status(200).json({ products: response })
+        res.status(200).json(response)
 
     } catch (e:any) {
         console.warn("Error", e)
