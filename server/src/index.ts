@@ -4,6 +4,7 @@ import cors from "cors"
 
 // get routes
 import { scrape } from "./routers/scrape-route";
+import { supabase_route } from "./routers/supabase-route";
 import { example } from "./routers/route-example";
 
 dotenv.config();
@@ -16,8 +17,8 @@ app.use(express.json({ limit: "100mb" })); // increase payload size limit as nee
 app.use(cors()); // allow all origins
 
 
-
 // use routes
+app.use("/db", supabase_route);
 app.use("/scrape", scrape);
 app.use("/example", example);
 
