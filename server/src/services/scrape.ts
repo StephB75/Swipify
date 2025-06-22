@@ -1,4 +1,4 @@
-const MAX_CHUNKS = 80;
+// const MAX_CHUNKS = 80;
 
 // HTML preprocessing to reduce size
 const preprocessHTML = (html: string): string => {
@@ -137,18 +137,18 @@ const chunkHTML = (html: string, maxChunkSize: number = 20): string[] => {
         chunks.push(currentChunk.trim());
     }
 
-    let filteredChunks = chunks.filter(chunk => chunk.length > 100);
+    // let filteredChunks = chunks.filter(chunk => chunk.length > 100);
 
     // Limit the number of chunks to MAX_CHUNKS
-    if (filteredChunks.length > MAX_CHUNKS) {
-        // Merge extra chunks into the last chunk
-        const limitedChunks = filteredChunks.slice(0, MAX_CHUNKS - 1);
-        const mergedChunk = filteredChunks.slice(MAX_CHUNKS - 1).join(' ');
-        limitedChunks.push(mergedChunk);
-        filteredChunks = limitedChunks;
-    }
-    return filteredChunks
-    // return chunks.filter(chunk => chunk.length > 100); // Filter out tiny chunks
+    // if (filteredChunks.length > MAX_CHUNKS) {
+    //     // Merge extra chunks into the last chunk
+    //     const limitedChunks = filteredChunks.slice(0, MAX_CHUNKS - 1);
+    //     const mergedChunk = filteredChunks.slice(MAX_CHUNKS - 1).join(' ');
+    //     limitedChunks.push(mergedChunk);
+    //     filteredChunks = limitedChunks;
+    // }
+    // return filteredChunks
+    return chunks.filter(chunk => chunk.length > 100); // Filter out tiny chunks
 };
 
 // Send individual chunk to OpenAI with detailed error handling
