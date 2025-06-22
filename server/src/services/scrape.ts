@@ -145,8 +145,8 @@ const chunkHTML = (html: string, maxChunkSize: number = 20): string[] => {
         limitedChunks.push(mergedChunk);
         filteredChunks = limitedChunks;
     }
-
-    return chunks.filter(chunk => chunk.length > 100); // Filter out tiny chunks
+    return filteredChunks
+    // return chunks.filter(chunk => chunk.length > 100); // Filter out tiny chunks
 };
 
 // Send individual chunk to OpenAI with detailed error handling
