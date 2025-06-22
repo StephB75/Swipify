@@ -254,7 +254,8 @@ const parse_products = async (
     baseUrl?: string,           // NEW: Base URL for resolving relative URLs
     maxWaitTime: number = 120000, // 2 minutes default timeout
     maxConcurrency: number = 3,   // Max parallel requests
-    maxProducts: number = 10,     // NEW: Maximum number of products to extract
+    // maxProducts: number = 10,     // NEW: Maximum number of products to extract
+    maxProducts: number = 15,     // NEW: Maximum number of products to extract
     onProgress?: (products: any[], completedChunks: number, totalChunks: number) => void
 ) => {
     try {
