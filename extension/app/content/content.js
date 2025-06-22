@@ -258,7 +258,21 @@ const createCard = async (product_name, price, url, media_url) => {
     if (deck) {
       deck.innerHTML = ''; // Clear existing cards
       for (const cardData of card_list) {
+        // Skip if no price
+        if (!cardData.price) continue;
+
+        // Create card but only append if image loads
         const card = await createCard(cardData.name, cardData.price, cardData.url, cardData.media);
+
+        // Check if image loads
+        const img = card.querySelector('img');
+        if (!img) continue;
+        const imageLoaded = await new Promise((resolve) => {
+          img.onload = () => resolve(true);
+          img.onerror = () => resolve(false);
+        });
+        if (!imageLoaded) continue;
+
         currentDeckElems.push(card)
         deck.appendChild(card);
       }
@@ -267,7 +281,7 @@ const createCard = async (product_name, price, url, media_url) => {
     }
     updateCurrentCard()
     console.log(card_list, currentDeckElems, currentCardIndex, currentCardElem)
-  }
+}
 
   const handleClick = () => {
       if (currentCardIndex >= 0){

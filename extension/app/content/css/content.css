@@ -250,20 +250,17 @@ swipify-wait-overlay.hidden {
 swipify-wait-overlay p{
     font-size: 3.5vh;
     font-weight: bold;
+    text-shadow: 0 2px 8px rgba(255,255,255,0.8);
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
 swipify-wait-overlay h1{
     font-size: 3.5vh;
-    padding: 5px 15px;
-    border-radius: 20px;
-    /* background: linear-gradient(270deg, #ff0080, #7928ca, #007cf0, #00dfd8, #ff0080); */
-    background: linear-gradient(90deg, #ff5f6d, #ffc371, #47cf73, #3aefff, #845ec2, #ff5f6d);
-    
-    background-size: 400% 400%;
-    color: white;
-    animation: rainbow-move 10s linear infinite;
-
-    text-transform: lowercase;
+    font-weight: bold;
+    text-shadow: 0 2px 8px rgba(255,255,255,0.8);
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
 swipify-wait-overlay .wait-loading{
@@ -273,7 +270,7 @@ swipify-wait-overlay .wait-loading{
     height: 5px;
     border-radius: 8px;
     transform: translateY(5vh);
-    background: linear-gradient(90deg, #e0e0e0, #ffffff, #666666, #ffffff, #e0e0e0);
+    background: linear-gradient(90deg, #ff5f6d, #ffc371, #47cf73, #3aefff, #845ec2, #ff5f6d);
     background-size: 200% 100%;
     animation: wait-bar-move 2s ease-in-out infinite alternate;
     box-shadow: 0 2px 12px rgba(0,0,0,0.15);

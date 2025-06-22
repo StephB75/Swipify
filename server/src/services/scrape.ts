@@ -72,7 +72,7 @@ const resolveImageUrl = (imageUrl: string, baseUrl: string): string => {
     }
 };
 
-const chunkHTML = (html: string, maxChunkSize: number = 20000): string[] => {
+const chunkHTML = (html: string, maxChunkSize: number = 10000): string[] => {
     const preprocessed = preprocessHTML(html);
 
     if (preprocessed.length <= maxChunkSize) {
@@ -148,7 +148,8 @@ const processChunk = async (chunk: string, chunkIndex: number, baseUrl?: string)
         }
 
         const requestBody = {
-            model: "gpt-4.1", // Updated to current model
+            // model: "gpt-4.1", // Updated to current model
+            model: "gpt-4o", // Updated to current model
             messages: [
                 {
                     role: "system",
@@ -247,16 +248,18 @@ ${chunk.substring(0, 12000)}`
     }
 };
 
-// Parallel processing with timeout and progressive results
+// Parallel processing with timeout and progressive results - MODIFIED TO STOP AT 10 PRODUCTS
 const parse_products = async (
     html: string, 
     baseUrl?: string,           // NEW: Base URL for resolving relative URLs
     maxWaitTime: number = 120000, // 2 minutes default timeout
     maxConcurrency: number = 3,   // Max parallel requests
+    maxProducts: number = 10,     // NEW: Maximum number of products to extract
     onProgress?: (products: any[], completedChunks: number, totalChunks: number) => void
 ) => {
     try {
         console.log(`Original HTML size: ${html.length} characters`);
+        console.log(`Will stop after extracting ${maxProducts} products`);
         if (baseUrl) {
             console.log(`Base URL for resolving relative URLs: ${baseUrl}`);
         }
@@ -274,6 +277,7 @@ const parse_products = async (
         const completedChunks = new Set<number>();
         const failedChunks = new Set<number>();
         let processedCount = 0;
+        let shouldStop = false; // NEW: Flag to stop processing
         
         // Create timeout promise
         const timeoutPromise = new Promise<never>((_, reject) => {
@@ -282,27 +286,37 @@ const parse_products = async (
             }, maxWaitTime);
         });
         
-        // Process chunks with concurrency control
+        // Process chunks with concurrency control - MODIFIED TO STOP AT MAX PRODUCTS
         const processChunksWithConcurrency = async (): Promise<any[]> => {
             const semaphore = new Array(maxConcurrency).fill(null);
             let chunkIndex = 0;
             
             const processNextChunk = async (): Promise<void> => {
-                while (chunkIndex < chunks.length) {
+                while (chunkIndex < chunks.length && !shouldStop) {
                     const currentIndex = chunkIndex++;
                     
                     try {
                         console.log(`Starting chunk ${currentIndex + 1}/${chunks.length}...`);
+                        console.log(`Current product count: ${allProducts.length}/${maxProducts}`);
                         
                         const chunkProducts = await processChunk(chunks[currentIndex]!, currentIndex, baseUrl);
                         
+                        // Check if adding these products would exceed our limit
+                        const productsToAdd = chunkProducts.slice(0, maxProducts - allProducts.length);
+                        
                         // Safely add products to shared array
-                        allProducts.push(...chunkProducts);
+                        allProducts.push(...productsToAdd);
                         completedChunks.add(currentIndex);
                         processedCount++;
                         
-                        console.log(`✅ Chunk ${currentIndex + 1} completed: ${chunkProducts.length} products`);
-                        console.log(`Progress: ${processedCount}/${chunks.length} chunks completed`);
+                        console.log(`✅ Chunk ${currentIndex + 1} completed: ${productsToAdd.length} products added (${chunkProducts.length} found)`);
+                        console.log(`Progress: ${processedCount}/${chunks.length} chunks completed, ${allProducts.length}/${maxProducts} products extracted`);
+                        
+                        // Check if we've reached our product limit
+                        if (allProducts.length >= maxProducts) {
+                            shouldStop = true;
+                            console.log(`🎯 Reached target of ${maxProducts} products! Stopping extraction.`);
+                        }
                         
                         // Call progress callback if provided
                         if (onProgress) {
@@ -342,10 +356,15 @@ const parse_products = async (
             console.log(`Completed chunks: ${completedChunks.size}/${chunks.length}`);
             console.log(`Failed chunks: ${failedChunks.size}/${chunks.length}`);
             console.log(`Total products extracted: ${allProducts.length}`);
+            console.log(`Target reached: ${allProducts.length >= maxProducts ? 'Yes' : 'No'}`);
             
             if (failedChunks.size > 0) {
                 console.warn(`⚠️  Warning: ${failedChunks.size} chunks failed to process`);
                 console.warn(`Failed chunk indices: ${Array.from(failedChunks).map(i => i + 1).join(', ')}`);
+            }
+            
+            if (shouldStop && allProducts.length >= maxProducts) {
+                console.log(`✅ Successfully stopped after reaching ${maxProducts} products`);
             }
             
         } catch (error) {
@@ -366,18 +385,25 @@ const parse_products = async (
             )
         );
         
+        // Ensure we don't exceed the max products limit after deduplication
+        const finalProducts = uniqueProducts.slice(0, maxProducts);
+        
         console.log(`Unique products after deduplication: ${uniqueProducts.length}`);
+        console.log(`Final products returned: ${finalProducts.length}`);
         
         // Return results even if some chunks failed or timed out
         return {
-            products: uniqueProducts,
+            products: finalProducts,
             metadata: {
                 totalChunks: chunks.length,
                 completedChunks: completedChunks.size,
                 failedChunks: failedChunks.size,
                 processingTimeMs: Date.now() - Date.now(), // Will be calculated properly
                 timedOut: failedChunks.size > 0 || completedChunks.size < chunks.length,
-                baseUrl: baseUrl || null
+                baseUrl: baseUrl || null,
+                maxProducts: maxProducts,
+                targetReached: finalProducts.length >= maxProducts,
+                stoppedEarly: shouldStop
             }
         };
         
@@ -391,14 +417,15 @@ const parse_products = async (
     }
 };
 
-// Helper function for easy JSON string return (backward compatibility)
+// Helper function for easy JSON string return (backward compatibility) - UPDATED WITH NEW PARAMETER
 const parse_products_json = async (
     html: string, 
     baseUrl?: string,          
     maxWaitTime?: number, 
-    maxConcurrency?: number
+    maxConcurrency?: number,
+    maxProducts: number = 10  
 ): Promise<string> => {
-    const result = await parse_products(html, baseUrl, maxWaitTime, maxConcurrency);
+    const result = await parse_products(html, baseUrl, maxWaitTime, maxConcurrency, maxProducts);
     return JSON.stringify(result.products, null, 2);
 };
 
