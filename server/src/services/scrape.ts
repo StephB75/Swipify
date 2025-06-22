@@ -1,4 +1,4 @@
-const MAX_CHUNKS = 50;
+const MAX_CHUNKS = 100;
 
 // HTML preprocessing to reduce size
 const preprocessHTML = (html: string): string => {
