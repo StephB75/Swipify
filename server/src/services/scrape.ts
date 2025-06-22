@@ -165,7 +165,7 @@ const processChunk = async (chunk: string, chunkIndex: number, baseUrl?: string)
         }
 
         const requestBody = {
-            model: "gpt-4o", // Updated to current model
+            model: "gpt-4.1", // Updated to current model
             messages: [
                 {
                     role: "system",
