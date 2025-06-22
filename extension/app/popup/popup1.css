@@ -9,7 +9,7 @@ body {
     background-color: #FFFFFF;
     background-size: 100% 40%;
     background-repeat: no-repeat;
-    height: 340px;
+    height: 300px;
     width: 360px;
     text-align: center;
     display: flex;
@@ -19,19 +19,30 @@ body {
 }
 
 .logo {
-    width: 120px;
+    width: 300px;
     text-align: center;
-    padding-bottom: 5%;
+    padding-bottom: 1%;
 }
 
 .scrape {
-    width: 30%;
+    width: 40%;
     height: 45px;
-    background-color: #525367;
+    background-color: #4a4a4a;
     color: #FFFFFF;
     border-radius: 30px;
     border: none;
     font-size: 20px;
     cursor: pointer;
     margin-top: 20px;
+    box-shadow: #525367 0px 5px 10px;
+    transition: 
+        transform 0.3s ease,
+        background-color 0.3s ease,
+        box-shadow 0.3s ease;
+}
+
+.scrape:hover {
+    transform: scale(1.05);
+    background-color: #3c3c3c;
+    box-shadow: #7a7b99 0px 8px 16px;
 }
