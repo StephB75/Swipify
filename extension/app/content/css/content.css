@@ -218,6 +218,11 @@ swipify-overlay swipify-card .price {
 }
 
 
+swipify-wait-overlay * {
+    font-family: 'Aeonik', sans-serif;
+    padding: 0;
+    margin: 0;
+}
 
 swipify-wait-overlay {
     position: fixed;

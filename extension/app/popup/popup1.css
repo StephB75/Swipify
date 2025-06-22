@@ -24,7 +24,7 @@ body {
     padding-bottom: 1%;
 }
 
-.scrape {
+.swipify {
     width: 40%;
     height: 45px;
     background-color: #4a4a4a;
@@ -41,7 +41,7 @@ body {
         box-shadow 0.3s ease;
 }
 
-.scrape:hover {
+.swipify:hover {
     transform: scale(1.05);
     background-color: #3c3c3c;
     box-shadow: #7a7b99 0px 8px 16px;

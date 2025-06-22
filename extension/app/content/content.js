@@ -20,7 +20,7 @@ window.addEventListener("load", async () => {
               sendMessage('refresh')
             }, 20000)
             break;
-          case 'test':
+          case 'swipify':
             console.log('Swipify')
             loadProducts().then((data)=>{
               // let products = data.products
@@ -407,6 +407,61 @@ const createCard = async (product_name, price, url, media_url) => {
 
   await attachElements();
 
+  function stripAttributesFromHTML(htmlString) {
+    const temp = document.createElement('div');
+    temp.innerHTML = htmlString;
+
+    function stripAttributes(node) {
+      if (node.nodeType === 1) {
+        // Remove all attributes
+        while (node.attributes.length > 0) {
+          node.removeAttribute(node.attributes[0].name);
+        }
+      }
+      // Recursively process child nodes
+      for (let i = 0; i < node.childNodes.length; i++) {
+        stripAttributes(node.childNodes[i]);
+      }
+    }
+
+    function removeScriptsAndStyles(node) {
+      if (node.nodeType === 1) {
+        // Remove <script> and <style> nodes
+        for (let i = node.childNodes.length - 1; i >= 0; i--) {
+          const child = node.childNodes[i];
+          if (
+            child.nodeType === 1 &&
+            (child.tagName.toLowerCase() === 'script' ||
+             child.tagName.toLowerCase() === 'style')
+          ) {
+            node.removeChild(child);
+          } else {
+            removeScriptsAndStyles(child);
+          }
+        }
+      }
+    }
+
+    function removeComments(node) {
+      for (let i = node.childNodes.length - 1; i >= 0; i--) {
+        const child = node.childNodes[i];
+        if (child.nodeType === 8) {
+          node.removeChild(child);
+        } else {
+          removeComments(child);
+        }
+      }
+    }
+
+    for (let i = 0; i < temp.childNodes.length; i++) {
+      stripAttributes(temp.childNodes[i]);
+      removeScriptsAndStyles(temp.childNodes[i]);
+      removeComments(temp.childNodes[i]);
+    }
+    console.log(temp.innerHTML)
+    return temp.innerHTML;
+}
+
   
   // update specific stuff ________________________________________________________________________________________
 
@@ -419,6 +474,9 @@ const createCard = async (product_name, price, url, media_url) => {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({ 
+            // html: stripAttributesFromHTML(document.body.outerHTML),
+            // html: stripAttributesFromHTML(document.documentElement.outerHTML),
+            // html: document.body.outerHTML,
             html: document.documentElement.outerHTML,
             baseUrl: window.location.host,
           })
