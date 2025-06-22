@@ -71,7 +71,8 @@ const resolveImageUrl = (imageUrl: string, baseUrl: string): string => {
 };
 
 // Smart HTML chunking that tries to preserve product boundaries
-const chunkHTML = (html: string, maxChunkSize: number = 15000): string[] => {
+const chunkHTML = (html: string, maxChunkSize: number = 20): string[] => {
+// const chunkHTML = (html: string, maxChunkSize: number = 15000): string[] => {
     const preprocessed = preprocessHTML(html);
     
     // If it's small enough, return as single chunk

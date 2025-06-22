@@ -22,8 +22,10 @@ window.addEventListener("load", async () => {
             break;
           case 'test':
             console.log('Swipify')
-            loadProducts()
-            openOverLay()
+            loadProducts().then(()=>{
+              openOverLay()
+            })
+            openWaitOverLay()
             break
           default:
             console.log('Swipify - received message:', request);
@@ -280,9 +282,23 @@ const createCard = async (product_name, price, url, media_url) => {
     return currentDeckElems[currentCardIndex] || null;
   }
 
+  const openWaitOverLay = () => {
+    const waiting = document.querySelector('swipify-wait-overlay')
+    waiting.classList.remove('hidden')
+    const waiting_message = waiting.querySelector('h1')
+    waiting_message.innerText = window.location.hostname 
+    closeOverlay()
+  }
+  
+  const closeWaitOverlay = () => {
+    const waiting = document.querySelector('swipify-wait-overlay')
+    waiting.classList.add('hidden')
+  }
+
   const openOverLay = () => {
     const overlay = document.querySelector('swipify-overlay')
     overlay.classList.remove('hidden')
+    closeWaitOverlay()
   }
   
   const closeOverlay = () => {
@@ -370,6 +386,20 @@ const createCard = async (product_name, price, url, media_url) => {
     overlay.appendChild(swipe_right);
 
     document.body.appendChild(overlay);
+
+    // wait overlay
+    const waiting = document.createElement('swipify-wait-overlay')
+    waiting.classList.add('hidden')
+    const waiting_message = document.createElement('p')
+    waiting_message.innerText = 'Swipifying'
+    const waiting_url = document.createElement('h1')
+    waiting_url.innerText = 'www.amazon.com'
+    const waiting_loading = document.createElement('div')
+    waiting_loading.classList.add('wait-loading')
+    waiting.appendChild(waiting_message)
+    waiting.appendChild(waiting_url)
+    waiting.appendChild(waiting_loading)
+    document.body.appendChild(waiting)
   }
 
   await attachElements();

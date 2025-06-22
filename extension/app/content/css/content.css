@@ -216,3 +216,70 @@ swipify-overlay swipify-card .price {
     /* color:#525367; */
     color:#000000;
 }
+
+
+
+swipify-wait-overlay {
+    position: fixed;
+    overflow: hidden;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999;
+    /* background-color: rgba(0, 0, 0, 0.1); */
+    background-color: rgba(0, 0, 0, 0.05);
+    /* background-color: transparent; */
+    backdrop-filter: blur(5px);
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+swipify-wait-overlay.hidden {
+    display: none;
+}
+
+swipify-wait-overlay p{
+    font-size: 3.5vh;
+    font-weight: bold;
+}
+
+swipify-wait-overlay h1{
+    font-size: 3.5vh;
+    padding: 5px 15px;
+    border-radius: 20px;
+    /* background: linear-gradient(270deg, #ff0080, #7928ca, #007cf0, #00dfd8, #ff0080); */
+    background: linear-gradient(90deg, #ff5f6d, #ffc371, #47cf73, #3aefff, #845ec2, #ff5f6d);
+    
+    background-size: 400% 400%;
+    color: white;
+    animation: rainbow-move 10s linear infinite;
+
+    text-transform: lowercase;
+}
+
+swipify-wait-overlay .wait-loading{
+    position: absolute;
+    width: 600px;
+    max-width: 80vw;
+    height: 5px;
+    border-radius: 8px;
+    transform: translateY(5vh);
+    background: linear-gradient(90deg, #e0e0e0, #ffffff, #666666, #ffffff, #e0e0e0);
+    background-size: 200% 100%;
+    animation: wait-bar-move 2s ease-in-out infinite alternate;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+}
+
+@keyframes wait-bar-move {
+    0% { background-position: 0% 0%; }
+    100% { background-position: 100% 0%; }
+}
+
+@keyframes rainbow-move {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
+}
